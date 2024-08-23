@@ -72,7 +72,7 @@ def notify_user(message):
     corps = f"Valeur détectée sur le site : {message}"
     message = f'Subject: {sujet}\n\n{corps}'
 
-    recipients = ["leover235v@gmail.com"] # Liste des destinataires
+    recipients = ["email address"] # Liste des destinataires
 
     # Envoi de l'email
     server.sendmail("adresse mail @gmail.com", recipients, message.encode('utf-8')) # Changer l'adresse email de l'expéditeur
