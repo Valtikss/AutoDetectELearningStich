@@ -43,23 +43,39 @@ def check_value():
         time.sleep(5) # Attendez quelques secondes pour que la page se charge
 
         soup = BeautifulSoup(driver.page_source, 'html.parser')
-        info_div = soup.find('div', id='information-message')
         
-        if info_div:
+        # Vérification des messages
+        info_div = soup.find('div', id='information-message')
+        max_prop_div = soup.find('div', id='max-proposition-filter')
+        
+        if info_div and max_prop_div:
             info_message = info_div.find('span').text.strip()
-            print("Message d'information :", info_message)
-            
-            if "Nous n’avons pas trouvé de disponibilités" in info_message:
-                print("Aucune disponibilité trouvée.")
-            else:
-                notify_user(info_message)
+            max_prop_message = max_prop_div.find('span').text.strip()
+
+            if info_message:
+                print("Message d'information :", info_message)
+                if "Nous n’avons pas trouvé de disponibilités" in info_message:
+                    print("Aucune disponibilité trouvée.")
+            elif max_prop_message:
+                print("Message max proposition filter:", max_prop_message)
+
+                # If courses are available, retrieve them
+                courses = soup.find_all('div', class_='course')
+                courses_details = []
+                for course in courses:
+                    date = course.find_previous('div', class_='course-day').text.strip()
+                    time = course.find('div', class_='course-time').text.strip()
+                    address = course.find('div', class_='course-address').text.strip()
+                    courses_details.append(f"{date} - {time} - {address}")
+
+                notify_user(None, courses_details)
         else:
-            print("La div avec l'id 'information-message' n'a pas été trouvée.")
+            print("Les divs 'information-message' ou 'max-proposition-filter' n'ont pas été trouvées.")
     
     finally:
         driver.quit()
 
-def notify_user(message):
+def notify_user(info_message, courses):
     # Configuration du serveur SMTP de Gmail
     server = smtplib.SMTP('smtp.gmail.com', 587)
     server.starttls()
@@ -69,7 +85,14 @@ def notify_user(message):
 
     # Contenu de l'email
     sujet = "Notification du script"
-    corps = f"Valeur détectée sur le site : {message}"
+    
+    if info_message:
+        corps = f"Message d'information : {info_message}"
+    elif courses:
+        corps = "Cours disponibles :\n" + "\n".join(courses)
+    else:
+        corps = "Aucun message ou cours à notifier."
+        
     message = f'Subject: {sujet}\n\n{corps}'
 
     recipients = ["email address"] # Liste des destinataires
