@@ -1,7 +1,7 @@
 import requests
 from bs4 import BeautifulSoup
 import schedule
-import time
+import time as t
 import smtplib
 from selenium import webdriver
 from selenium.webdriver.common.by import By
@@ -33,14 +33,14 @@ def check_value():
 
         print("Connecté !")
         
-        time.sleep(5)  # Attendez quelques secondes pour que la page se charge
+        t.sleep(5)  # Attendez quelques secondes pour que la page se charge
 
         # Naviguer vers la page cible après connexion
         driver.get('https://www.stych.fr/elearning/formation/conduite/reservation/planning')
 
         print("Récupération de la valeur...")
 
-        time.sleep(5) # Attendez quelques secondes pour que la page se charge
+        t.sleep(5) # Attendez quelques secondes pour que la page se charge
 
         soup = BeautifulSoup(driver.page_source, 'html.parser')
         
@@ -103,7 +103,7 @@ def notify_user(info_message, courses):
 
 # Planification du script entre 8h et 20h
 def job():
-    current_hour = time.localtime().tm_hour
+    current_hour = t.localtime().tm_hour
     if 8 <= current_hour < 20:
         check_value()
 
@@ -111,4 +111,4 @@ schedule.every(30).minutes.do(job) # Changer la fréquence de vérification (en 
 
 while True:
     schedule.run_pending()
-    time.sleep(1)
+    t.sleep(1)
